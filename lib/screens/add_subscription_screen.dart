@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import '../services/firestore_service.dart';
 
 class AddSubscriptionScreen extends StatefulWidget {
   final String serviceName;
@@ -23,6 +24,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
   DateTime _selectedDate = DateTime.now();
   
   String _selectedPaymentMethod = 'PayPal';
+  bool _isLoading = false;
 
   final List<String> _paymentMethods = [
     'PayPal',
@@ -39,6 +41,51 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
     _priceController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveSubscription() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final double price = double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
+    
+    final String cycle = _selectedCycleIndex == 0 ? 'Mensile' : 'Annuale';
+
+    final bool success = await FirestoreService().addSubscription(
+      serviceName: widget.serviceName,
+      domain: widget.domain,
+      price: price,
+      cycle: cycle,
+      paymentMethod: _selectedPaymentMethod,
+      nextRenewal: _selectedDate,
+      notes: _notesController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.serviceName} aggiunto con successo!'),
+          backgroundColor: CupertinoColors.activeGreen,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.pop(context);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Errore durante il salvataggio.'),
+          backgroundColor: CupertinoColors.destructiveRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -279,7 +326,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                       padding: EdgeInsets.zero,
                       color: CupertinoColors.systemGrey5,
                       borderRadius: BorderRadius.circular(12),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: _isLoading ? null : () => Navigator.pop(context),
                       child: const Text('Annulla', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
                     ),
                   ),
@@ -290,11 +337,10 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                       padding: EdgeInsets.zero,
                       color: const Color(0xFF007AFF),
                       borderRadius: BorderRadius.circular(12),
-                      onPressed: () {
-                        debugPrint("Salvataggio...");
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      onPressed: _isLoading ? null : _saveSubscription,
+                      child: _isLoading 
+                          ? const CupertinoActivityIndicator(color: Colors.white) 
+                          : const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
