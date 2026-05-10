@@ -41,4 +41,19 @@ class FirestoreService {
       return false;
     }
   }
+
+  Future<bool> deleteSubscription(String docId) async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user == null) return false;
+
+      await _db.collection('subscriptions').doc(docId).delete();
+      
+      debugPrint("Abbonamento $docId eliminato con successo!");
+      return true;
+    } catch (e) {
+      debugPrint("Errore durante l'eliminazione: $e");
+      return false;
+    }
+  }
 }

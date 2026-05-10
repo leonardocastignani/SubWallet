@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/add_subscription_modal.dart';
+import '../services/firestore_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('subscriptions')
@@ -39,14 +39,47 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 100),
             itemCount: subscriptions.length,
             itemBuilder: (context, index) {
-              final subData = subscriptions[index].data() as Map<String, dynamic>;
-              
-              return _buildSubscriptionCard(subData);
+              final doc = subscriptions[index];
+              final subData = doc.data() as Map<String, dynamic>;
+              final String docId = doc.id;
+
+              return Dismissible(
+                key: Key(docId),
+                direction: DismissDirection.endToStart,
+                
+                background: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(right: 20),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.destructiveRed,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  alignment: Alignment.centerRight,
+                  child: const Icon(CupertinoIcons.trash, color: Colors.white, size: 28),
+                ),
+
+                onDismissed: (direction) async {
+                  final String serviceName = subData['serviceName'] ?? 'Abbonamento';
+                  
+                  await FirestoreService().deleteSubscription(docId);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$serviceName eliminato'),
+                        backgroundColor: Colors.black87,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+
+                child: _buildSubscriptionCard(subData),
+              );
             },
           );
         },
       ),
-      
       floatingActionButton: FloatingActionButton(
         onPressed: () => showAddSubscriptionModal(context),
         backgroundColor: const Color(0xFF007AFF), 
@@ -85,21 +118,13 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             'Nessun abbonamento',
-            style: TextStyle(
-              fontSize: 22, 
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: -0.5),
           ),
           const SizedBox(height: 8),
           const Text(
             'Aggiungi il tuo primo abbonamento\nper iniziare a tracciarlo.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15, 
-              color: CupertinoColors.systemGrey,
-              height: 1.3,
-            ),
+            style: TextStyle(fontSize: 15, color: CupertinoColors.systemGrey, height: 1.3),
           ),
         ],
       ),
@@ -107,6 +132,8 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildSubscriptionCard(Map<String, dynamic> data) {
+    final String domain = data['domain'] ?? '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -129,15 +156,19 @@ class HomeScreen extends StatelessWidget {
               width: 50,
               height: 50,
               color: CupertinoColors.systemGrey6,
-              child: Image.network(
-                'https://www.google.com/s2/favicons?domain=${data['domain']}&sz=128',
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => const Icon(CupertinoIcons.globe, color: CupertinoColors.systemGrey),
-              ),
+              child: domain == 'custom'
+                  ? Container(
+                      color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                      child: const Icon(CupertinoIcons.star_fill, color: Color(0xFF007AFF), size: 24),
+                    )
+                  : Image.network(
+                      'https://www.google.com/s2/favicons?domain=$domain&sz=128',
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => const Icon(CupertinoIcons.globe, color: CupertinoColors.systemGrey),
+                    ),
             ),
           ),
           const SizedBox(width: 16),
-          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,14 +185,9 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          
           Text(
             '€${(data['price'] ?? 0.0).toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 18, 
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF007AFF),
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF007AFF)),
           ),
         ],
       ),
