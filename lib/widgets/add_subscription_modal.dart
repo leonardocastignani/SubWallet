@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import '../screens/add_subscription_screen.dart';
 
 void showAddSubscriptionModal(BuildContext context) {
   showDialog(
@@ -94,7 +95,15 @@ Widget _buildServiceTile(BuildContext context, String name, String domain) {
     trailing: const Icon(CupertinoIcons.add_circled, color: Color(0xFF007AFF), size: 24),
     onTap: () {
       Navigator.pop(context);
-      debugPrint("Hai selezionato: $name.");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddSubscriptionScreen(
+            serviceName: name,
+            domain: domain,
+          ),
+        ),
+      );
     },
   );
 }
