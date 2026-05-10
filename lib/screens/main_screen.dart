@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
+import 'statistics_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,7 +15,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
 
   final List<Widget> _screens = [
-    const Center(child: Text('Statistiche', style: TextStyle(color: Colors.grey))),
+    const StatisticsScreen(),
     const HomeScreen(),
     const SettingsScreen(),
   ];

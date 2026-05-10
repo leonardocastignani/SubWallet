@@ -12,6 +12,7 @@ class FirestoreService {
     required double price,
     required String cycle,
     required String paymentMethod,
+    required String category,
     required DateTime nextRenewal,
     required String notes,
   }) async {
@@ -29,6 +30,7 @@ class FirestoreService {
         'price': price,
         'cycle': cycle,
         'paymentMethod': paymentMethod,
+        'category': category,
         'nextRenewal': Timestamp.fromDate(nextRenewal),
         'notes': notes,
         'createdAt': FieldValue.serverTimestamp(),

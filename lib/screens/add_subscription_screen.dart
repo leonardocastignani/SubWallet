@@ -26,11 +26,17 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
   int _selectedCycleIndex = 0;
   DateTime _selectedDate = DateTime.now();
   String _selectedPaymentMethod = 'PayPal';
+  String _selectedCategory = 'Intrattenimento';
   bool _isLoading = false;
 
   final List<String> _paymentMethods = [
     'PayPal', 'Carta di Credito', 'Bonifico', 'Ricarica Postepay', 
     'Apple Pay', 'Google Pay', 'Altro'
+  ];
+
+  final List<String> _categories = [
+    'Intrattenimento', 'Produttività', 'Gaming', 'Informazione', 
+    'Salute e Sport', 'Utility', 'Altro'
   ];
 
   @override
@@ -71,6 +77,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
       price: price,
       cycle: cycle,
       paymentMethod: _selectedPaymentMethod,
+      category: _selectedCategory,
       nextRenewal: _selectedDate,
       notes: _notesController.text,
     );
@@ -208,6 +215,75 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
             _buildSection(
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Categoria', style: TextStyle(fontSize: 17)),
+                      const SizedBox(width: 16),
+                      Flexible(
+                        child: PopupMenuButton<String>(
+                          initialValue: _selectedCategory,
+                          color: Colors.white,
+                          surfaceTintColor: Colors.white,
+                          elevation: 6,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          position: PopupMenuPosition.under,
+                          onSelected: (String newValue) => setState(() => _selectedCategory = newValue),
+                          itemBuilder: (BuildContext context) {
+                            return _categories.map((String category) {
+                              return PopupMenuItem<String>(
+                                value: category,
+                                height: 44,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        category,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: _selectedCategory == category ? const Color(0xFF007AFF) : Colors.black87,
+                                          fontWeight: _selectedCategory == category ? FontWeight.w600 : FontWeight.w400,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (_selectedCategory == category)
+                                      const Icon(CupertinoIcons.checkmark_alt, color: Color(0xFF007AFF), size: 18),
+                                  ],
+                                ),
+                              );
+                            }).toList();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    _selectedCategory,
+                                    style: const TextStyle(color: Color(0xFF007AFF), fontSize: 17, fontWeight: FontWeight.w500),
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(CupertinoIcons.chevron_up_chevron_down, size: 14, color: CupertinoColors.systemGrey2),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
