@@ -5,11 +5,13 @@ import '../services/firestore_service.dart';
 class AddSubscriptionScreen extends StatefulWidget {
   final String serviceName;
   final String domain;
+  final bool isCustom; 
 
   const AddSubscriptionScreen({
     super.key,
     required this.serviceName,
     required this.domain,
+    this.isCustom = false, 
   });
 
   @override
@@ -17,46 +19,55 @@ class AddSubscriptionScreen extends StatefulWidget {
 }
 
 class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
+  final TextEditingController _nameController = TextEditingController(); 
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   
   int _selectedCycleIndex = 0;
   DateTime _selectedDate = DateTime.now();
-  
   String _selectedPaymentMethod = 'PayPal';
   bool _isLoading = false;
 
   final List<String> _paymentMethods = [
-    'PayPal',
-    'Carta di Credito',
-    'Bonifico',
-    'Ricarica Postepay',
-    'Apple Pay',
-    'Google Pay',
-    'Altro'
+    'PayPal', 'Carta di Credito', 'Bonifico', 'Ricarica Postepay', 
+    'Apple Pay', 'Google Pay', 'Altro'
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (!widget.isCustom) {
+      _nameController.text = widget.serviceName;
+    }
+  }
+
+  @override
   void dispose() {
+    _nameController.dispose();
     _priceController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveSubscription() async {
-    if (_isLoading) return;
+  bool _canSave() {
+    if (_isLoading) return false;
+    if (widget.isCustom && _nameController.text.trim().isEmpty) return false;
+    return true;
+  }
 
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _saveSubscription() async {
+    if (!_canSave()) return;
+
+    final String finalServiceName = widget.isCustom ? _nameController.text.trim() : widget.serviceName;
+
+    setState(() => _isLoading = true);
 
     final double price = double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0;
-    
     final String cycle = _selectedCycleIndex == 0 ? 'Mensile' : 'Annuale';
 
     final bool success = await FirestoreService().addSubscription(
-      serviceName: widget.serviceName,
-      domain: widget.domain,
+      serviceName: finalServiceName,
+      domain: widget.isCustom ? 'custom' : widget.domain, 
       price: price,
       cycle: cycle,
       paymentMethod: _selectedPaymentMethod,
@@ -64,27 +75,17 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
       notes: _notesController.text,
     );
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.serviceName} aggiunto con successo!'),
+          content: Text('$finalServiceName aggiunto!'),
           backgroundColor: CupertinoColors.activeGreen,
           behavior: SnackBarBehavior.floating,
         ),
       );
       Navigator.pop(context);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Errore durante il salvataggio.'),
-          backgroundColor: CupertinoColors.destructiveRed,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     }
   }
 
@@ -102,38 +103,63 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
             const SizedBox(height: 16),
             
             Hero(
-              tag: 'logo_${widget.serviceName}',
+              tag: widget.isCustom ? 'logo_custom' : 'logo_${widget.serviceName}',
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                    )
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)
                   ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    'https://www.google.com/s2/favicons?domain=${widget.domain}&sz=256',
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => 
-                      const Icon(CupertinoIcons.globe, size: 40, color: CupertinoColors.systemGrey),
-                  ),
+                  child: widget.isCustom 
+                    ? Container(
+                        width: 60, height: 60,
+                        color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                        child: const Icon(CupertinoIcons.star_fill, size: 34, color: Color(0xFF007AFF)),
+                      )
+                    : Image.network(
+                        'https://www.google.com/s2/favicons?domain=${widget.domain}&sz=256',
+                        width: 60, height: 60, fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(CupertinoIcons.globe, size: 40, color: CupertinoColors.systemGrey),
+                      ),
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              widget.serviceName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: widget.isCustom
+                  ? CupertinoTextField(
+                      controller: _nameController,
+                      textAlign: TextAlign.center,
+                      placeholder: 'Nome (es. Palestra)',
+                      placeholderStyle: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 20),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey6,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _nameController.text.trim().isEmpty 
+                              ? CupertinoColors.destructiveRed.withValues(alpha: 0.6) 
+                              : Colors.transparent,
+                          width: 1.5,
+                        ),
+                      ),
+                      onChanged: (value) => setState(() {}),
+                    )
+                  : Text(
+                      widget.serviceName,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             _buildSection(
               children: [
@@ -148,10 +174,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                           controller: _priceController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           textAlign: TextAlign.right,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: '0.00',
-                          ),
+                          decoration: const InputDecoration(border: InputBorder.none, hintText: '0.00'),
                           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -192,7 +215,6 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                     children: [
                       const Text('Pagamento', style: TextStyle(fontSize: 17)),
                       const SizedBox(width: 16),
-                      
                       Flexible(
                         child: PopupMenuButton<String>(
                           initialValue: _selectedPaymentMethod,
@@ -201,11 +223,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                           elevation: 6,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           position: PopupMenuPosition.under,
-                          onSelected: (String newValue) {
-                            setState(() {
-                              _selectedPaymentMethod = newValue;
-                            });
-                          },
+                          onSelected: (String newValue) => setState(() => _selectedPaymentMethod = newValue),
                           itemBuilder: (BuildContext context) {
                             return _paymentMethods.map((String method) {
                               return PopupMenuItem<String>(
@@ -303,10 +321,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                           filled: true,
                           fillColor: const Color(0xFFF9F9F9),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                         ),
                       ),
                     ],
@@ -336,8 +351,9 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                     child: CupertinoButton(
                       padding: EdgeInsets.zero,
                       color: const Color(0xFF007AFF),
+                      disabledColor: const Color(0xFF007AFF).withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(12),
-                      onPressed: _isLoading ? null : _saveSubscription,
+                      onPressed: _canSave() ? _saveSubscription : null,
                       child: _isLoading 
                           ? const CupertinoActivityIndicator(color: Colors.white) 
                           : const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -356,10 +372,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
   Widget _buildSection({required List<Widget> children}) {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Column(children: children),
     );
   }

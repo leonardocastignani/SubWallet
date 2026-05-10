@@ -134,7 +134,16 @@ Widget _buildCustomServiceTile(BuildContext context) {
     ),
     onTap: () {
       Navigator.pop(context);
-      debugPrint("Hai scelto personalizzato. Aprire form vuoto!");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AddSubscriptionScreen(
+            serviceName: '',
+            domain: '',
+            isCustom: true,
+          ),
+        ),
+      );
     },
   );
 }

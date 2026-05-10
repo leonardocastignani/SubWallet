@@ -10,11 +10,11 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
     const Center(child: Text('Statistiche', style: TextStyle(color: Colors.grey))),
+    const HomeScreen(),
     const Center(child: Text('Impostazioni', style: TextStyle(color: Colors.grey))),
   ];
 
@@ -43,14 +43,14 @@ class _MainScreenState extends State<MainScreen> {
           },
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
-              activeIcon: Icon(CupertinoIcons.house_fill),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chart_bar),
               activeIcon: Icon(CupertinoIcons.chart_bar_fill),
               label: 'Statistiche',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.home),
+              activeIcon: Icon(CupertinoIcons.house_fill),
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.settings),
