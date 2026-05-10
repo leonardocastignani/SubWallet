@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "793739497223",
+    "project_id": "subwallet-app-01",
+    "storage_bucket": "subwallet-app-01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793739497223:android:dae4046f67a18f5f18ffa2",
+        "android_client_info": {
+          "package_name": "com.example.subwallet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-3daeok5DCkxle5UIWCFzLgDix5UcXfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
