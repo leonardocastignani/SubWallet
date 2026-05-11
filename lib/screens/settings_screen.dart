@@ -22,7 +22,6 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -162,8 +161,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
-            const SizedBox(height: 28),
+            const SizedBox(height: 16),
           ],
         ),
       ),

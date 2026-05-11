@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/category_chart_modal.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -48,8 +49,7 @@ class StatisticsScreen extends StatelessWidget {
           final double avgCost = totalSubs > 0 ? (totalMonthlySpend / totalSubs) : 0.0;
 
           return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -93,6 +93,9 @@ class StatisticsScreen extends StatelessWidget {
                   iconColor: CupertinoColors.activeGreen,
                   title: 'Spesa per categoria',
                   subtitle: 'Streaming, produttività, gaming, news',
+                  onTap: () {
+                    showCategoryChartModal(context, subscriptions);
+                  },
                 ),
                 _buildDetailTile(
                   icon: CupertinoIcons.graph_square_fill,
@@ -118,7 +121,6 @@ class StatisticsScreen extends StatelessWidget {
                   title: 'Insight intelligenti (AI)',
                   subtitle: 'Analisi automatica e consigli di risparmio',
                 ),
-                const SizedBox(height: 1),
               ],
             ),
           );
@@ -154,7 +156,7 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailTile({required IconData icon, required Color iconColor, required String title, required String subtitle}) {
+  Widget _buildDetailTile({required IconData icon, required Color iconColor, required String title, required String subtitle, VoidCallback? onTap,}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -186,8 +188,7 @@ class StatisticsScreen extends StatelessWidget {
           child: Text(subtitle, style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
         ),
         trailing: const Icon(CupertinoIcons.chevron_right, color: CupertinoColors.systemGrey4, size: 20),
-        onTap: () {
-        },
+        onTap: onTap,
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'main_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -17,9 +17,7 @@ class LoginScreen extends StatelessWidget {
       );
 
       final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
-
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
       final clientAuth = await googleUser.authorizationClient.authorizeScopes(['email', 'profile']);
 
       final credential = GoogleAuthProvider.credential(
@@ -31,16 +29,9 @@ class LoginScreen extends StatelessWidget {
 
       if (userCredential.user != null) {
         debugPrint("Accesso completato con successo: ${userCredential.user!.displayName}");
-        
-        if (context.mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-          );
-        }
       }
     } catch (e) {
-      debugPrint("Errore durante il login: $e");
+      debugPrint("Errore o login annullato: $e");
     }
   }
 
@@ -120,9 +111,9 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       Image.network(
                         'https://cdn-icons-png.flaticon.com/512/300/300221.png', 
-                        width: 24, 
-                        height: 24,
-                        errorBuilder: (c, e, s) => const Icon(Icons.g_mobiledata, color: Colors.black, size: 32),
+                        width: 23,
+                        height: 23,
+                        errorBuilder: (c, e, s) => const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -138,9 +129,14 @@ class LoginScreen extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                  Fluttertoast.showToast(
+                    msg: "Login con Apple in arrivo!",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: const Color(0xFF333333),
+                    textColor: Colors.white,
+                    fontSize: 15.0,
                   );
                 },
                 child: Container(
@@ -152,7 +148,7 @@ class LoginScreen extends StatelessWidget {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.apple, color: Colors.white, size: 28),
+                      Icon(Icons.apple, color: Colors.white, size: 30),
                       SizedBox(width: 12),
                       Text(
                         'Continua con Apple', 

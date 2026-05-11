@@ -35,8 +35,7 @@ class HomeScreen extends StatelessWidget {
           final subscriptions = snapshot.data!.docs;
 
           return ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 100),
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 88),
             itemCount: subscriptions.length,
             itemBuilder: (context, index) {
               final doc = subscriptions[index];
