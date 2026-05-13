@@ -65,7 +65,7 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
     }
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.80,
+      height: MediaQuery.of(context).size.height * 0.70,
       decoration: const BoxDecoration(
         color: Color(0xFFF2F2F7),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
