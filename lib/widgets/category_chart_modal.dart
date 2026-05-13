@@ -158,7 +158,13 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
                 
                 const SizedBox(height: 32),
                 
-                const Text('DETTAGLIO MENSILE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2)),
+                const Row(
+                  children: [
+                    Icon(CupertinoIcons.chart_pie_fill, color: CupertinoColors.activeGreen, size: 18),
+                    SizedBox(width: 6),
+                    Text('DETTAGLIO MENSILE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2)),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 
                 Container(

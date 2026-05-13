@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/category_chart_modal.dart';
 import '../widgets/trend_chart_modal.dart';
+import '../widgets/payment_calendar_modal.dart';
 
 class StatisticsScreen
     extends
@@ -205,6 +206,12 @@ class StatisticsScreen
                           iconColor: CupertinoColors.systemOrange,
                           title: 'Calendario pagamenti',
                           subtitle: 'Visualizzazione di quando escono i soldi',
+                          onTap: () {
+                            showPaymentCalendarModal(
+                              context,
+                              subscriptions
+                            );
+                          },
                         ),
                         _buildDetailTile(
                           icon: CupertinoIcons.list_number,

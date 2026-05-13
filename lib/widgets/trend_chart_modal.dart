@@ -105,7 +105,7 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Text(
-              'Andamento nel tempo', 
+              'Andamento nel Tempo', 
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5)
             ),
           ),
