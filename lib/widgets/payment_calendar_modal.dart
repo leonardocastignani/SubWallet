@@ -159,7 +159,13 @@ class _PaymentCalendarModalContentState extends State<_PaymentCalendarModalConte
                 ),
                 
                 const SizedBox(height: 32),
-                const Text('TIMELINE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2)),
+                const Row(
+                  children: [
+                    Icon(CupertinoIcons.clock, color: CupertinoColors.systemOrange, size: 18), // <--- CAMBIATA ICONA QUI
+                    SizedBox(width: 6),
+                    Text('TIMELINE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2)),
+                  ],
+                ),
                 const SizedBox(height: 12),
 
                 if (_upcomingPayments.isEmpty)

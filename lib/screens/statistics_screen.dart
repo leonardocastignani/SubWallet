@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../widgets/category_chart_modal.dart';
 import '../widgets/trend_chart_modal.dart';
 import '../widgets/payment_calendar_modal.dart';
+import '../widgets/cost_ranking_modal.dart';
 
 class StatisticsScreen
     extends
@@ -216,14 +218,31 @@ class StatisticsScreen
                         _buildDetailTile(
                           icon: CupertinoIcons.list_number,
                           iconColor: CupertinoColors.systemPink,
-                          title: 'Classifica per costo',
+                          title: 'Classifica per Costo',
                           subtitle: 'Dal più caro al più economico',
+                          onTap: () {
+                            showCostRankingModal(
+                              context,
+                              subscriptions
+                            );
+                          },
                         ),
                         _buildDetailTile(
                           icon: CupertinoIcons.sparkles,
                           iconColor: CupertinoColors.systemPurple,
-                          title: 'Insight intelligenti (AI)',
+                          title: 'Insight Intelligenti (AI)',
                           subtitle: 'Analisi automatica e consigli di risparmio',
+                          onTap: () {
+                            Fluttertoast.showToast(
+                              msg: "Insight AI in arrivo a breve! 🚀",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: const Color(0xFF333333),
+                              textColor: Colors.white,
+                              fontSize: 15.0,
+                            );
+                          },
                         ),
                       ],
                     ),
