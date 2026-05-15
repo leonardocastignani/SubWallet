@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -32,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage() async {
+    final prov = context.read<SettingsProvider>();
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
@@ -42,11 +45,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Errore nell'apertura della galleria");
+      Fluttertoast.showToast(msg: prov.t('gallery_error'));
     }
   }
 
   Future<void> _updateProfile() async {
+    final prov = context.read<SettingsProvider>();
     final newName = _nameController.text.trim();
     if (newName.isEmpty) return;
 
@@ -67,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await user?.reload(); 
       
       Fluttertoast.showToast(
-        msg: "Profilo aggiornato! ✅",
+        msg: prov.t('profile_updated'),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: CupertinoColors.activeGreen,
@@ -77,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       Fluttertoast.showToast(
-        msg: "Errore nell'aggiornamento.",
+        msg: prov.t('update_error'),
         backgroundColor: CupertinoColors.destructiveRed,
         textColor: Colors.white,
       );
@@ -88,6 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final prov = context.watch<SettingsProvider>();
+    
     final String photoUrl = user?.photoURL ?? '';
     final String displayName = user?.displayName ?? 'Utente';
     final String initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
@@ -95,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        title: const Text('Profilo'),
+        title: Text(prov.t('profile')),
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -155,35 +161,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 32),
                   
                   _buildSectionHeader(
-                    'INFORMAZIONI PUBBLICHE', 
+                    prov.t('public_info'), 
                     CupertinoIcons.person_crop_circle, 
                     CupertinoColors.activeBlue
                   ),
                   _buildSectionContainer(
                     children: [
-                      _buildEditableRow('Nome', _nameController),
+                      _buildEditableRow(prov.t('name_label'), _nameController, prov.t('insert_name')),
                     ],
                   ),
 
                   const SizedBox(height: 24),
 
                   _buildSectionHeader(
-                    'SICUREZZA', 
+                    prov.t('security'), 
                     CupertinoIcons.shield_fill, 
                     CupertinoColors.systemGreen
                   ),
                   _buildSectionContainer(
                     children: [
-                      _buildReadOnlyRow('Email', user?.email ?? ''),
+                      _buildReadOnlyRow(prov.t('email'), user?.email ?? ''),
                     ],
                   ),
 
-                  const Padding(
-                    padding: EdgeInsets.all(24.0),
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
                     child: Text(
-                      'I dati del tuo profilo sono sincronizzati con il tuo account Google e vengono utilizzati per personalizzare la tua esperienza su SubWallet. Puoi modificare il tuo nome e la tua foto del profilo, ma l\'email è protetta per motivi di sicurezza.',
+                      prov.t('profile_desc'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
+                      style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
                     ),
                   ),
                 ],
@@ -207,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: CupertinoColors.systemGrey5,
                       borderRadius: BorderRadius.circular(12),
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      child: const Text('Indietro', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+                      child: Text(prov.t('back'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -221,7 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: _isLoading ? null : _updateProfile,
                       child: _isLoading 
                           ? const CupertinoActivityIndicator(color: Colors.white) 
-                          : const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          : Text(prov.t('save'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -275,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildEditableRow(String label, TextEditingController controller) {
+  Widget _buildEditableRow(String label, TextEditingController controller, String hint) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -287,10 +293,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: TextField(
               controller: controller,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Inserisci nome',
-                hintStyle: TextStyle(color: CupertinoColors.systemGrey4),
+                hintText: hint,
+                hintStyle: const TextStyle(color: CupertinoColors.systemGrey4),
               ),
               style: const TextStyle(fontSize: 16),
             ),

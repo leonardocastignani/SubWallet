@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -37,6 +39,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final prov = context.watch<SettingsProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),
       body: SafeArea(
@@ -78,10 +82,10 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Tieni sotto controllo i tuoi\nabbonamenti in un unico posto.',
+              Text(
+                prov.t('login_subtitle'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16, 
                   color: CupertinoColors.systemGrey, 
                   height: 1.3
@@ -116,9 +120,9 @@ class LoginScreen extends StatelessWidget {
                         errorBuilder: (c, e, s) => const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Continua con Google', 
-                        style: TextStyle(color: Colors.black87, fontSize: 17, fontWeight: FontWeight.w600)
+                      Text(
+                        prov.t('continue_google'), 
+                        style: const TextStyle(color: Colors.black87, fontSize: 17, fontWeight: FontWeight.w600)
                       ),
                     ],
                   ),
@@ -130,7 +134,7 @@ class LoginScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 onPressed: () {
                   Fluttertoast.showToast(
-                    msg: "Login con Apple in arrivo!",
+                    msg: prov.t('apple_coming_soon'),
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                     timeInSecForIosWeb: 1,
@@ -145,14 +149,14 @@ class LoginScreen extends StatelessWidget {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.apple, color: Colors.white, size: 30),
-                      SizedBox(width: 12),
+                      const Icon(Icons.apple, color: Colors.white, size: 30),
+                      const SizedBox(width: 12),
                       Text(
-                        'Continua con Apple', 
-                        style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)
+                        prov.t('continue_apple'), 
+                        style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)
                       ),
                     ],
                   ),

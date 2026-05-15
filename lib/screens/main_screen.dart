@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
@@ -38,26 +40,22 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          items: const [
+          onTap: (index) => setState(() => _currentIndex = index),
+          items: [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chart_bar),
               activeIcon: Icon(CupertinoIcons.chart_bar_fill),
-              label: 'Statistiche',
+              label: context.watch<SettingsProvider>().t('tab_stats'),
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
               activeIcon: Icon(CupertinoIcons.house_fill),
-              label: 'Home',
+              label: context.watch<SettingsProvider>().t('tab_home'),
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.settings),
               activeIcon: Icon(CupertinoIcons.settings_solid),
-              label: 'Impostazioni',
+              label: context.watch<SettingsProvider>().t('tab_settings'),
             ),
           ],
         ),
