@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -35,6 +36,12 @@ class SettingsScreen extends StatelessWidget {
                   iconColor: CupertinoColors.activeBlue,
                   title: user?.displayName ?? 'Profilo',
                   subtitle: user?.email ?? 'Accedi per gestire i tuoi dati',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                    );
+                  },
                 ),
                 _buildSettingsTile(
                   icon: CupertinoIcons.money_euro,
@@ -208,6 +215,7 @@ class SettingsScreen extends StatelessWidget {
     required String subtitle,
     Widget? trailing,
     bool isLast = false,
+    VoidCallback? onTap,
   }) {
     return Column(
       children: [
@@ -229,8 +237,7 @@ class SettingsScreen extends StatelessWidget {
             child: Text(subtitle, style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
           ),
           trailing: trailing ?? const Icon(CupertinoIcons.chevron_right, color: CupertinoColors.systemGrey4, size: 20),
-          onTap: () {
-          },
+          onTap: onTap,
         ),
         if (!isLast)
           const Divider(height: 1, indent: 72, endIndent: 0, color: Color(0xFFF3F3F3)),
