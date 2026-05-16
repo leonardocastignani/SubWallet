@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/firestore_service.dart';
+import '../services/notification_service.dart';
 
 class AddSubscriptionScreen extends StatefulWidget {
   final String serviceName;
@@ -64,6 +65,22 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
+      try {
+        if (prov.reminderDays > 0) {
+          await NotificationService().scheduleRenewalReminder(
+            serviceName: finalServiceName,
+            price: price,
+            renewalDate: _selectedDate,
+            reminderDays: prov.reminderDays,
+            currency: prov.currency,
+          );
+        }
+      } catch (e) {
+        debugPrint("Errore durante la programmazione della notifica: $e");
+      }
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$finalServiceName ${prov.t('added')}'), backgroundColor: CupertinoColors.activeGreen, behavior: SnackBarBehavior.floating));
       Navigator.pop(context);
     }

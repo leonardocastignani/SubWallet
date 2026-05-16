@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 
-class CurrencyLanguageScreen extends StatelessWidget {
-  const CurrencyLanguageScreen({super.key});
+class RemindersScreen extends StatelessWidget {
+  const RemindersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class CurrencyLanguageScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        title: Text(provider.t('cur_lang_title')),
+        title: Text(provider.t('reminders_title')),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -21,43 +21,29 @@ class CurrencyLanguageScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 32),
             
-            _buildSectionHeader(provider.t('cur_header')),
+            _buildSectionHeader(provider.t('alert_before')),
             _buildSectionContainer(
               children: [
                 _buildCheckableTile(
-                  title: 'Euro (€)', 
-                  isSelected: provider.currency == '€', 
-                  onTap: () => provider.setCurrency('€')
+                  title: provider.t('day_1'), 
+                  isSelected: provider.reminderDays == 1, 
+                  onTap: () => provider.setReminderDays(1)
                 ),
                 _buildCheckableTile(
-                  title: 'Dollaro Statunitense (\$)', 
-                  isSelected: provider.currency == '\$', 
-                  onTap: () => provider.setCurrency('\$')
+                  title: provider.t('days_3'), 
+                  isSelected: provider.reminderDays == 3, 
+                  onTap: () => provider.setReminderDays(3)
                 ),
                 _buildCheckableTile(
-                  title: 'Sterlina Britannica (£)', 
-                  isSelected: provider.currency == '£', 
+                  title: provider.t('days_7'), 
+                  isSelected: provider.reminderDays == 7, 
+                  onTap: () => provider.setReminderDays(7)
+                ),
+                _buildCheckableTile(
+                  title: provider.t('none'), 
+                  isSelected: provider.reminderDays == 0, 
                   isLast: true,
-                  onTap: () => provider.setCurrency('£')
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 32),
-
-            _buildSectionHeader(provider.t('lang_header')),
-            _buildSectionContainer(
-              children: [
-                _buildCheckableTile(
-                  title: 'Italiano', 
-                  isSelected: provider.language == 'Italiano', 
-                  onTap: () => provider.setLanguage('Italiano')
-                ),
-                _buildCheckableTile(
-                  title: 'English', 
-                  isSelected: provider.language == 'English', 
-                  isLast: true,
-                  onTap: () => provider.setLanguage('English')
+                  onTap: () => provider.setReminderDays(0)
                 ),
               ],
             ),
@@ -65,7 +51,7 @@ class CurrencyLanguageScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Text(
-                provider.t('cur_note'),
+                provider.t('reminders_note'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
               ),

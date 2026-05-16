@@ -3,9 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../providers/settings_provider.dart';
 import 'profile_screen.dart';
-import 'currency_language_screen.dart';
+import 'reminders_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -17,12 +18,6 @@ class SettingsScreen extends StatelessWidget {
     } catch (e) {
       debugPrint("Errore: $e");
     }
-  }
-
-  IconData _getCurrencyIcon(String currency) {
-    if (currency == '\$') return CupertinoIcons.money_dollar;
-    if (currency == '£') return CupertinoIcons.money_pound;
-    return CupertinoIcons.money_euro;
   }
 
   @override
@@ -46,10 +41,18 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
                 ),
                 _buildSettingsTile(
-                  icon: _getCurrencyIcon(prov.currency),
+                  icon: CupertinoIcons.money_euro,
                   iconColor: CupertinoColors.systemGreen,
                   title: prov.t('cur_lang'), subtitle: prov.t('cur_lang_sub'), isLast: true,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrencyLanguageScreen())),
+                  onTap: () {
+                    Fluttertoast.showToast(
+                      msg: "Impostazione momentaneamente non disponibile 🚧",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: const Color(0xFF333333),
+                      textColor: Colors.white,
+                    );
+                  },
                 ),
               ],
             ),
@@ -57,7 +60,11 @@ class SettingsScreen extends StatelessWidget {
             _buildSectionHeader(prov.t('sec_notif')),
             _buildSectionContainer(
               children: [
-                _buildSettingsTile(icon: CupertinoIcons.bell_fill, iconColor: CupertinoColors.systemOrange, title: prov.t('reminders'), subtitle: prov.t('reminders_sub')),
+                _buildSettingsTile(
+                  icon: CupertinoIcons.bell_fill, iconColor: CupertinoColors.systemOrange, 
+                  title: prov.t('reminders'), subtitle: prov.t('reminders_sub'),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RemindersScreen())),
+                ),
                 _buildSettingsTile(icon: CupertinoIcons.doc_text_fill, iconColor: CupertinoColors.systemYellow, title: prov.t('report'), subtitle: prov.t('report_sub')),
                 _buildSettingsTile(icon: CupertinoIcons.exclamationmark_triangle_fill, iconColor: CupertinoColors.destructiveRed, title: prov.t('budget'), subtitle: prov.t('budget_sub'), isLast: true),
               ],
