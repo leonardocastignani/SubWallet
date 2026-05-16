@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/notification_service.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
@@ -21,6 +22,12 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().requestPermission();
+  }
 
   @override
   Widget build(BuildContext context) {

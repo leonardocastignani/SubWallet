@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/add_subscription_modal.dart';
 import '../services/firestore_service.dart';
+import 'subscription_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -49,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                     );
                   }
                 },
-                child: _buildSubscriptionCard(subData, prov),
+                child: _buildSubscriptionCard(context, doc.id, subData, prov),
               );
             },
           );
@@ -82,38 +83,48 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSubscriptionCard(Map<String, dynamic> data, SettingsProvider prov) {
+  Widget _buildSubscriptionCard(BuildContext context, String docId, Map<String, dynamic> data, SettingsProvider prov) {
     final String domain = data['domain'] ?? '';
     final double price = (data['price'] ?? 0.0).toDouble();
     final String cycle = prov.tCycle(data['cycle'] ?? 'Mensile');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))]),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 50, height: 50, color: CupertinoColors.systemGrey6,
-              child: domain == 'custom'
-                  ? Container(color: const Color(0xFF007AFF).withValues(alpha: 0.1), child: const Icon(CupertinoIcons.star_fill, color: Color(0xFF007AFF), size: 24))
-                  : Image.network('https://www.google.com/s2/favicons?domain=$domain&sz=128', fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(CupertinoIcons.globe, color: CupertinoColors.systemGrey)),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SubscriptionDetailScreen(docId: docId, subData: data),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(data['serviceName'] ?? prov.t('unknown'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
-                const SizedBox(height: 4),
-                Text(cycle, style: const TextStyle(fontSize: 14, color: CupertinoColors.systemGrey)),
-              ],
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))]),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 50, height: 50, color: CupertinoColors.systemGrey6,
+                child: domain == 'custom'
+                    ? Container(color: const Color(0xFF007AFF).withValues(alpha: 0.1), child: const Icon(CupertinoIcons.star_fill, color: Color(0xFF007AFF), size: 24))
+                    : Image.network('https://www.google.com/s2/favicons?domain=$domain&sz=128', fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(CupertinoIcons.globe, color: CupertinoColors.systemGrey)),
+              ),
             ),
-          ),
-          Text('${prov.currency}${price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF007AFF))),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(data['serviceName'] ?? prov.t('unknown'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+                  const SizedBox(height: 4),
+                  Text(cycle, style: const TextStyle(fontSize: 14, color: CupertinoColors.systemGrey)),
+                ],
+              ),
+            ),
+            Text('${prov.currency}${price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF007AFF))),
+          ],
+        ),
       ),
     );
   }

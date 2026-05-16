@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/notification_service.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -30,6 +31,7 @@ class LoginScreen extends StatelessWidget {
       final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userCredential.user != null) {
+        await NotificationService().requestPermission();
         debugPrint("Accesso completato con successo: ${userCredential.user!.displayName}");
       }
     } catch (e) {
