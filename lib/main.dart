@@ -3,11 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
-import 'providers/settings_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -20,15 +18,7 @@ void main() async {
 
   await NotificationService().init();
 
-  final settingsProvider = SettingsProvider();
-  await settingsProvider.loadSettings();
-
-  runApp(
-    ChangeNotifierProvider.value(
-      value: settingsProvider,
-      child: const SubWalletApp(),
-    ),
-  );
+  runApp(const SubWalletApp());
 }
 
 class SubWalletApp extends StatelessWidget {
@@ -43,9 +33,10 @@ class SubWalletApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF007AFF)),
         scaffoldBackgroundColor: const Color(0xFFF2F2F7),
-        splashColor: const Color(0xFF007AFF).withValues(alpha: 0.15),
-        highlightColor: Colors.transparent,
         
+        splashColor: const Color(0xFF007AFF).withValues(alpha: 0.1),
+        highlightColor: const Color(0xFF007AFF).withValues(alpha: 0.2),
+
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF9FC9FF),
           elevation: 0, 
@@ -82,14 +73,13 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CupertinoActivityIndicator(radius: 20)),
           );
         }
 
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           return const MainScreen();
         }
 

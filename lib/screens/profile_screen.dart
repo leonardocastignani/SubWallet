@@ -5,8 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,7 +32,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final prov = context.read<SettingsProvider>();
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
@@ -45,12 +42,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: prov.t('gallery_error'));
+      Fluttertoast.showToast(msg: "Errore nell'apertura della galleria");
     }
   }
 
   Future<void> _updateProfile() async {
-    final prov = context.read<SettingsProvider>();
     final newName = _nameController.text.trim();
     if (newName.isEmpty) return;
 
@@ -71,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await user?.reload(); 
       
       Fluttertoast.showToast(
-        msg: prov.t('profile_updated'),
+        msg: "Profilo aggiornato! ✅",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: CupertinoColors.activeGreen,
@@ -81,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       Fluttertoast.showToast(
-        msg: prov.t('update_error'),
+        msg: "Errore nell'aggiornamento.",
         backgroundColor: CupertinoColors.destructiveRed,
         textColor: Colors.white,
       );
@@ -92,147 +88,158 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.watch<SettingsProvider>();
-    
     final String photoUrl = user?.photoURL ?? '';
     final String displayName = user?.displayName ?? 'Utente';
     final String initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        title: Text(prov.t('profile')),
+        title: const Text('Profilo'),
         automaticallyImplyLeading: false,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 32),
-                  
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 110,
-                            height: 110,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(55),
-                                child: _buildAvatar(initial, photoUrl),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF007AFF),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                              ),
-                              child: const Icon(CupertinoIcons.camera_fill, color: Colors.white, size: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  _buildSectionHeader(
-                    prov.t('public_info'), 
-                    CupertinoIcons.person_crop_circle, 
-                    CupertinoColors.activeBlue
-                  ),
-                  _buildSectionContainer(
-                    children: [
-                      _buildEditableRow(prov.t('name_label'), _nameController, prov.t('insert_name')),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  _buildSectionHeader(
-                    prov.t('security'), 
-                    CupertinoIcons.shield_fill, 
-                    CupertinoColors.systemGreen
-                  ),
-                  _buildSectionContainer(
-                    children: [
-                      _buildReadOnlyRow(prov.t('email'), user?.email ?? ''),
-                    ],
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Text(
-                      prov.t('profile_desc'),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
-                    ),
-                  ),
-                ],
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF9FC9FF), Color(0xFFF2F2F7)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.25],
               ),
             ),
           ),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 32),
+                      
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Center(
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 110,
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.08),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(55),
+                                    child: _buildAvatar(initial, photoUrl),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF007AFF),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                  ),
+                                  child: const Icon(CupertinoIcons.camera_fill, color: Colors.white, size: 16),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      _buildSectionHeader(
+                        'INFORMAZIONI PUBBLICHE', 
+                        CupertinoIcons.person_crop_circle, 
+                        CupertinoColors.activeBlue
+                      ),
+                      _buildSectionContainer(
+                        children: [
+                          _buildEditableRow('Nome', _nameController, 'Inserisci nome'),
+                        ],
+                      ),
 
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F7),
-              border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
-            ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      color: CupertinoColors.systemGrey5,
-                      borderRadius: BorderRadius.circular(12),
-                      onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      child: Text(prov.t('back'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
-                    ),
+                      const SizedBox(height: 24),
+
+                      _buildSectionHeader(
+                        'SICUREZZA', 
+                        CupertinoIcons.shield_fill, 
+                        CupertinoColors.systemGreen
+                      ),
+                      _buildSectionContainer(
+                        children: [
+                          _buildReadOnlyRow('Email', user?.email ?? ''),
+                        ],
+                      ),
+
+                      const Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: Text(
+                          'I dati del profilo sono sincronizzati con Google per personalizzare l\'esperienza su SubWallet. Puoi cambiare nome e foto, non l\'email.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      color: const Color(0xFF007AFF),
-                      disabledColor: const Color(0xFF007AFF).withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      onPressed: _isLoading ? null : _updateProfile,
-                      child: _isLoading 
-                          ? const CupertinoActivityIndicator(color: Colors.white) 
-                          : Text(prov.t('save'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2F2F7),
+                  border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
+                ),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          color: CupertinoColors.systemGrey5,
+                          borderRadius: BorderRadius.circular(12),
+                          onPressed: _isLoading ? null : () => Navigator.pop(context),
+                          child: const Text('Indietro', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          color: const Color(0xFF007AFF),
+                          disabledColor: const Color(0xFF007AFF).withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          onPressed: _isLoading ? null : _updateProfile,
+                          child: _isLoading 
+                              ? const CupertinoActivityIndicator(color: Colors.white) 
+                              : const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

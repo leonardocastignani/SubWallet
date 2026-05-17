@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
 
 void showCategoryChartModal(BuildContext context, List<QueryDocumentSnapshot> subscriptions) {
   showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => _CategoryChartModalContent(subscriptions: subscriptions));
@@ -26,7 +24,6 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.watch<SettingsProvider>();
     Map<String, double> categoryTotals = {};
     double grandTotal = 0;
 
@@ -43,13 +40,13 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
 
     var sortedCategories = categoryTotals.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
-    String selectedCategoryName = prov.t('total');
+    String selectedCategoryName = 'Totale';
     double selectedCategoryValue = grandTotal;
     Color selectedColor = CupertinoColors.inactiveGray;
 
     if (touchedIndex != -1 && touchedIndex < sortedCategories.length) {
       var entry = sortedCategories[touchedIndex];
-      selectedCategoryName = prov.tCat(entry.key);
+      selectedCategoryName = entry.key;
       selectedCategoryValue = entry.value;
       selectedColor = categoryColors[entry.key] ?? CupertinoColors.inactiveGray;
     }
@@ -60,7 +57,7 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
       child: Column(
         children: [
           Container(margin: const EdgeInsets.only(top: 12, bottom: 8), width: 40, height: 5, decoration: BoxDecoration(color: CupertinoColors.systemGrey4, borderRadius: BorderRadius.circular(10))),
-          Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(prov.t('cat_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Spesa per categoria', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
           Expanded(
             child: ListView(
               physics: const BouncingScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -89,8 +86,8 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
                           children: [
                             Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: selectedColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Text(selectedCategoryName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: selectedColor, letterSpacing: 0.5))),
                             const SizedBox(height: 6),
-                            Text('${prov.currency}${selectedCategoryValue.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: -1)),
-                            Text(prov.t('per_month'), style: const TextStyle(fontSize: 12, color: CupertinoColors.systemGrey2)),
+                            Text('€${selectedCategoryValue.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                            const Text('/mese', style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey2)),
                           ],
                         ),
                       ],
@@ -98,7 +95,7 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
                   ),
                 ),
                 const SizedBox(height: 32),
-                Row(children: [const Icon(CupertinoIcons.chart_pie_fill, color: CupertinoColors.activeGreen, size: 18), const SizedBox(width: 6), Text(prov.t('monthly_detail'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2))]),
+                const Row(children: [Icon(CupertinoIcons.chart_pie_fill, color: CupertinoColors.activeGreen, size: 18), SizedBox(width: 6), Text('DETTAGLIO MENSILE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2))]),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
@@ -111,9 +108,9 @@ class _CategoryChartModalContentState extends State<_CategoryChartModalContent> 
                         children: [
                           CupertinoListTile(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), leading: Container(width: 32, height: 32, decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle), child: Center(child: Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)))),
-                            title: Text(prov.tCat(entry.key), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            title: Text(entry.key, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                             subtitle: Text('$percentage%', style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
-                            trailing: Text('${prov.currency}${entry.value.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            trailing: Text('€${entry.value.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                           if (!isLast) const Divider(height: 1, indent: 64, color: Color(0xFFF3F3F3)),
                         ],

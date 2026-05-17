@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
 
 void showPaymentCalendarModal(BuildContext context, List<QueryDocumentSnapshot> subscriptions) {
   showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => _PaymentCalendarModalContent(subscriptions: subscriptions));
@@ -28,6 +26,11 @@ class _PaymentCalendarModalContentState extends State<_PaymentCalendarModalConte
   void initState() {
     super.initState();
     _calculateUpcomingPayments();
+  }
+
+  String _getMonthShort(int month) {
+    const it = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+    return it[month - 1];
   }
 
   DateTime _getActualNextRenewal(DateTime pastDate, String cycle) {
@@ -68,15 +71,13 @@ class _PaymentCalendarModalContentState extends State<_PaymentCalendarModalConte
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.watch<SettingsProvider>();
-
     return Container(
       height: MediaQuery.of(context).size.height * 0.70,
       decoration: const BoxDecoration(color: Color(0xFFF2F2F7), borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       child: Column(
         children: [
           Container(margin: const EdgeInsets.only(top: 12, bottom: 8), width: 40, height: 5, decoration: BoxDecoration(color: CupertinoColors.systemGrey4, borderRadius: BorderRadius.circular(10))),
-          Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(prov.t('cal_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Calendario pagamenti', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
           Expanded(
             child: ListView(
               physics: const BouncingScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -88,19 +89,19 @@ class _PaymentCalendarModalContentState extends State<_PaymentCalendarModalConte
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [const Icon(CupertinoIcons.calendar, color: CupertinoColors.systemOrange, size: 20), const SizedBox(width: 8), Text(prov.t('next_30_days'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey))]),
+                      const Row(children: [Icon(CupertinoIcons.calendar, color: CupertinoColors.systemOrange, size: 20), SizedBox(width: 8), Text('Prossimi 30 giorni', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey))]),
                       const SizedBox(height: 12),
-                      Text('${prov.currency}${_upcomingTotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
-                      Text('${_upcomingPayments.length} ${prov.t('payments_soon')}', style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
+                      Text('€${_upcomingTotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                      Text('${_upcomingPayments.length} pagamenti in uscita a breve', style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                Row(children: [const Icon(CupertinoIcons.clock, color: CupertinoColors.systemOrange, size: 18), const SizedBox(width: 6), Text(prov.t('timeline_title'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2))]),
+                const Row(children: [Icon(CupertinoIcons.clock, color: CupertinoColors.systemOrange, size: 18), SizedBox(width: 6), Text('TIMELINE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2))]),
                 const SizedBox(height: 12),
 
                 if (_upcomingPayments.isEmpty)
-                  Padding(padding: const EdgeInsets.all(24.0), child: Center(child: Text(prov.t('no_payments'), style: const TextStyle(color: CupertinoColors.systemGrey))))
+                  const Padding(padding: EdgeInsets.all(24.0), child: Center(child: Text('Nessun pagamento in programma.', style: TextStyle(color: CupertinoColors.systemGrey))))
                 else
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
@@ -118,11 +119,11 @@ class _PaymentCalendarModalContentState extends State<_PaymentCalendarModalConte
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), leadingSize: 48,
                               leading: Container(
                                 width: 48, height: 48, decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${date.day}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color, height: 1.0)), Text(prov.tMonthShort(date.month), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color.withValues(alpha: 0.7), letterSpacing: 0.5))]),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${date.day}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color, height: 1.0)), Text(_getMonthShort(date.month), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color.withValues(alpha: 0.7), letterSpacing: 0.5))]),
                               ),
                               title: Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                              subtitle: Text(prov.tCat(payment['category']), style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
-                              trailing: Text('${prov.currency}${price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              subtitle: Text(payment['category'], style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
+                              trailing: Text('€${price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ),
                             if (!isLast) const Divider(height: 1, indent: 80, color: Color(0xFFF3F3F3)),
                           ],

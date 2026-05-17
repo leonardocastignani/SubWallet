@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
 
@@ -48,7 +47,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
     return true;
   }
 
-  Future<void> _saveSubscription(SettingsProvider prov) async {
+  Future<void> _saveSubscription() async {
     if (!_canSave()) return;
     final String finalServiceName = widget.isCustom ? _nameController.text.trim() : widget.serviceName;
     setState(() => _isLoading = true);
@@ -66,13 +65,15 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
     if (success && mounted) {
       try {
-        if (prov.reminderDays > 0) {
+        final prefs = await SharedPreferences.getInstance();
+        final reminderDays = prefs.getInt('reminderDays') ?? 3;
+        if (reminderDays > 0) {
           await NotificationService().scheduleRenewalReminder(
             serviceName: finalServiceName,
             price: price,
             renewalDate: _selectedDate,
-            reminderDays: prov.reminderDays,
-            currency: prov.currency,
+            reminderDays: reminderDays,
+            currency: '€',
           );
         }
       } catch (e) {
@@ -81,17 +82,15 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$finalServiceName ${prov.t('added')}'), backgroundColor: CupertinoColors.activeGreen, behavior: SnackBarBehavior.floating));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$finalServiceName aggiunto!'), backgroundColor: CupertinoColors.activeGreen, behavior: SnackBarBehavior.floating));
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.watch<SettingsProvider>();
-
     return Scaffold(
-      appBar: AppBar(title: Text(prov.t('sub_details')), automaticallyImplyLeading: false),
+      appBar: AppBar(title: const Text('Dettagli Abbonamento'), automaticallyImplyLeading: false),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
@@ -116,7 +115,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
               child: widget.isCustom
                   ? CupertinoTextField(
                       controller: _nameController, textAlign: TextAlign.center,
-                      placeholder: prov.t('name_placeholder'), placeholderStyle: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 20),
+                      placeholder: 'Nome (es. Palestra)', placeholderStyle: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 20),
                       style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       decoration: BoxDecoration(color: CupertinoColors.systemGrey6, borderRadius: BorderRadius.circular(12), border: Border.all(color: _nameController.text.trim().isEmpty ? CupertinoColors.destructiveRed.withValues(alpha: 0.6) : Colors.transparent, width: 1.5)),
                       onChanged: (value) => setState(() {}),
@@ -131,9 +130,9 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Row(
                     children: [
-                      Text(prov.t('cost'), style: const TextStyle(fontSize: 17)), const Spacer(),
+                      const Text('Costo', style: TextStyle(fontSize: 17)), const Spacer(),
                       Expanded(child: TextField(controller: _priceController, keyboardType: const TextInputType.numberWithOptions(decimal: true), textAlign: TextAlign.right, decoration: const InputDecoration(border: InputBorder.none, hintText: '0.00'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600))),
-                      const SizedBox(width: 4), Text(prov.currency, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 4), const Text('€', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -143,12 +142,12 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(prov.t('cycle'), style: const TextStyle(fontSize: 17)),
+                      const Text('Ciclo', style: TextStyle(fontSize: 17)),
                       CupertinoSlidingSegmentedControl<int>(
                         groupValue: _selectedCycleIndex,
-                        children: {
-                          0: Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(prov.t('monthly'))),
-                          1: Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(prov.t('annual'))),
+                        children: const {
+                          0: Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('Mensile')),
+                          1: Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('Annuale')),
                         },
                         onValueChanged: (int? v) => setState(() => _selectedCycleIndex = v!),
                       ),
@@ -165,7 +164,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(prov.t('category'), style: const TextStyle(fontSize: 17)), const SizedBox(width: 16),
+                      const Text('Categoria', style: TextStyle(fontSize: 17)), const SizedBox(width: 16),
                       Flexible(
                         child: PopupMenuButton<String>(
                           initialValue: _selectedCategory, color: Colors.white, surfaceTintColor: Colors.white, elevation: 6, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), position: PopupMenuPosition.under,
@@ -177,7 +176,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Expanded(child: Text(prov.tCat(category), style: TextStyle(fontSize: 16, color: _selectedCategory == category ? const Color(0xFF007AFF) : Colors.black87, fontWeight: _selectedCategory == category ? FontWeight.w600 : FontWeight.w400), overflow: TextOverflow.ellipsis)),
+                                    Expanded(child: Text(category, style: TextStyle(fontSize: 16, color: _selectedCategory == category ? const Color(0xFF007AFF) : Colors.black87, fontWeight: _selectedCategory == category ? FontWeight.w600 : FontWeight.w400), overflow: TextOverflow.ellipsis)),
                                     if (_selectedCategory == category) const Icon(CupertinoIcons.checkmark_alt, color: Color(0xFF007AFF), size: 18),
                                   ],
                                 ),
@@ -189,7 +188,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Flexible(child: Text(prov.tCat(_selectedCategory), style: const TextStyle(color: Color(0xFF007AFF), fontSize: 17, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, textAlign: TextAlign.right)),
+                                Flexible(child: Text(_selectedCategory, style: const TextStyle(color: Color(0xFF007AFF), fontSize: 17, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, textAlign: TextAlign.right)),
                                 const SizedBox(width: 4), const Icon(CupertinoIcons.chevron_up_chevron_down, size: 14, color: CupertinoColors.systemGrey2),
                               ],
                             ),
@@ -205,7 +204,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(prov.t('payment'), style: const TextStyle(fontSize: 17)), const SizedBox(width: 16),
+                      const Text('Pagamento', style: TextStyle(fontSize: 17)), const SizedBox(width: 16),
                       Flexible(
                         child: PopupMenuButton<String>(
                           initialValue: _selectedPaymentMethod, color: Colors.white, surfaceTintColor: Colors.white, elevation: 6, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), position: PopupMenuPosition.under,
@@ -217,7 +216,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Expanded(child: Text(prov.tPay(method), style: TextStyle(fontSize: 16, color: _selectedPaymentMethod == method ? const Color(0xFF007AFF) : Colors.black87, fontWeight: _selectedPaymentMethod == method ? FontWeight.w600 : FontWeight.w400), overflow: TextOverflow.ellipsis)),
+                                    Expanded(child: Text(method, style: TextStyle(fontSize: 16, color: _selectedPaymentMethod == method ? const Color(0xFF007AFF) : Colors.black87, fontWeight: _selectedPaymentMethod == method ? FontWeight.w600 : FontWeight.w400), overflow: TextOverflow.ellipsis)),
                                     if (_selectedPaymentMethod == method) const Icon(CupertinoIcons.checkmark_alt, color: Color(0xFF007AFF), size: 18),
                                   ],
                                 ),
@@ -229,7 +228,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Flexible(child: Text(prov.tPay(_selectedPaymentMethod), style: const TextStyle(color: Color(0xFF007AFF), fontSize: 17, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, textAlign: TextAlign.right)),
+                                Flexible(child: Text(_selectedPaymentMethod, style: const TextStyle(color: Color(0xFF007AFF), fontSize: 17, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, textAlign: TextAlign.right)),
                                 const SizedBox(width: 4), const Icon(CupertinoIcons.chevron_up_chevron_down, size: 14, color: CupertinoColors.systemGrey2),
                               ],
                             ),
@@ -245,7 +244,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(prov.t('next_renewal'), style: const TextStyle(fontSize: 17)),
+                      const Text('Prossimo rinnovo', style: TextStyle(fontSize: 17)),
                       TextButton(
                         onPressed: () async {
                           final DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime(2100));
@@ -266,10 +265,10 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(prov.t('notes'), style: const TextStyle(fontSize: 17)), const SizedBox(height: 8),
+                      const Text('Note', style: TextStyle(fontSize: 17)), const SizedBox(height: 8),
                       TextField(
                         controller: _notesController, maxLines: 2,
-                        decoration: InputDecoration(hintText: prov.t('additional_details'), hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14), filled: true, fillColor: const Color(0xFFF9F9F9), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)),
+                        decoration: InputDecoration(hintText: 'Dettagli aggiuntivi...', hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14), filled: true, fillColor: const Color(0xFFF9F9F9), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none)),
                       ),
                     ],
                   ),
@@ -286,7 +285,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                     child: CupertinoButton(
                       padding: EdgeInsets.zero, color: CupertinoColors.systemGrey5, borderRadius: BorderRadius.circular(12),
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      child: Text(prov.t('cancel'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+                      child: const Text('Annulla', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -294,8 +293,8 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                     flex: 2,
                     child: CupertinoButton(
                       padding: EdgeInsets.zero, color: const Color(0xFF007AFF), disabledColor: const Color(0xFF007AFF).withValues(alpha: 0.4), borderRadius: BorderRadius.circular(12),
-                      onPressed: _canSave() ? () => _saveSubscription(prov) : null,
-                      child: _isLoading ? const CupertinoActivityIndicator(color: Colors.white) : Text(prov.t('save'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      onPressed: _canSave() ? _saveSubscription : null,
+                      child: _isLoading ? const CupertinoActivityIndicator(color: Colors.white) : const Text('Salva', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import '../providers/settings_provider.dart';
 import 'profile_screen.dart';
 import 'reminders_screen.dart';
 
@@ -23,103 +20,104 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final prov = context.watch<SettingsProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 1),
-            _buildSectionHeader(prov.t('sec_account')),
-            _buildSectionContainer(
-              children: [
-                _buildSettingsTile(
-                  icon: CupertinoIcons.person_fill, iconColor: CupertinoColors.activeBlue,
-                  title: user?.displayName ?? prov.t('profile'), subtitle: user?.email ?? prov.t('profile_sub'),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
-                ),
-                _buildSettingsTile(
-                  icon: CupertinoIcons.money_euro,
-                  iconColor: CupertinoColors.systemGreen,
-                  title: prov.t('cur_lang'), subtitle: prov.t('cur_lang_sub'), isLast: true,
-                  onTap: () {
-                    Fluttertoast.showToast(
-                      msg: "Impostazione momentaneamente non disponibile 🚧",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      backgroundColor: const Color(0xFF333333),
-                      textColor: Colors.white,
-                    );
-                  },
-                ),
-              ],
-            ),
-
-            _buildSectionHeader(prov.t('sec_notif')),
-            _buildSectionContainer(
-              children: [
-                _buildSettingsTile(
-                  icon: CupertinoIcons.bell_fill, iconColor: CupertinoColors.systemOrange, 
-                  title: prov.t('reminders'), subtitle: prov.t('reminders_sub'),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RemindersScreen())),
-                ),
-                _buildSettingsTile(icon: CupertinoIcons.doc_text_fill, iconColor: CupertinoColors.systemYellow, title: prov.t('report'), subtitle: prov.t('report_sub')),
-                _buildSettingsTile(icon: CupertinoIcons.exclamationmark_triangle_fill, iconColor: CupertinoColors.destructiveRed, title: prov.t('budget'), subtitle: prov.t('budget_sub'), isLast: true),
-              ],
-            ),
-
-            _buildSectionHeader(prov.t('sec_data')),
-            _buildSectionContainer(
-              children: [
-                _buildSettingsTile(icon: CupertinoIcons.arrow_down_doc_fill, iconColor: CupertinoColors.systemTeal, title: prov.t('import_export'), subtitle: prov.t('import_export_sub')),
-                _buildSettingsTile(icon: CupertinoIcons.cloud_fill, iconColor: CupertinoColors.activeBlue, title: prov.t('cloud_sync'), subtitle: prov.t('cloud_sync_sub')),
-                _buildSettingsTile(icon: CupertinoIcons.device_phone_portrait, iconColor: CupertinoColors.systemIndigo, title: prov.t('multi_dev'), subtitle: prov.t('multi_dev_sub'), isLast: true),
-              ],
-            ),
-
-            _buildSectionHeader(prov.t('sec_appearance')),
-            _buildSectionContainer(
-              children: [
-                _buildSettingsTile(icon: CupertinoIcons.moon_fill, iconColor: CupertinoColors.systemGrey, title: prov.t('theme'), subtitle: prov.t('theme_sub')),
-                _buildSettingsTile(icon: CupertinoIcons.square_grid_2x2_fill, iconColor: CupertinoColors.systemGrey2, title: prov.t('def_view'), subtitle: prov.t('def_view_sub'), isLast: true),
-              ],
-            ),
-
-            _buildSectionHeader(prov.t('sec_privacy')),
-            _buildSectionContainer(
-              children: [
-                _buildSettingsTile(icon: CupertinoIcons.lock_fill, iconColor: CupertinoColors.systemGrey, title: prov.t('app_lock'), subtitle: prov.t('app_lock_sub')),
-                _buildSettingsTile(
-                  icon: CupertinoIcons.eye_slash_fill, iconColor: CupertinoColors.systemGrey,
-                  title: prov.t('priv_mode'), subtitle: prov.t('priv_mode_sub'), isLast: true,
-                  trailing: CupertinoSwitch(value: false, onChanged: (bool value) {}, activeTrackColor: CupertinoColors.activeBlue),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CupertinoButton(
-                padding: EdgeInsets.zero, color: CupertinoColors.destructiveRed.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), onPressed: _signOut,
-                child: SizedBox(
-                  height: 56,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(CupertinoIcons.square_arrow_right, color: CupertinoColors.destructiveRed, size: 22),
-                      const SizedBox(width: 10),
-                      Text(prov.t('logout'), style: const TextStyle(color: CupertinoColors.destructiveRed, fontSize: 17, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF9FC9FF), Color(0xFFF2F2F7)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.25],
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  _buildSectionHeader('ACCOUNT'),
+                  _buildSectionContainer(
+                    children: [
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.person_fill, iconColor: CupertinoColors.activeBlue,
+                        title: user?.displayName ?? 'Profilo', subtitle: user?.email ?? 'Accedi per gestire i tuoi dati',
+                        isLast: true,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
+                      ),
+                    ],
+                  ),
+
+                  _buildSectionHeader('NOTIFICHE'),
+                  _buildSectionContainer(
+                    children: [
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.bell_fill, iconColor: CupertinoColors.systemOrange, 
+                        title: 'Promemoria rinnovo', subtitle: 'Avvisa 1/3/7 giorni prima',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RemindersScreen())),
+                      ),
+                      _buildSettingsTile(icon: CupertinoIcons.doc_text_fill, iconColor: CupertinoColors.systemYellow, title: 'Report mensile', subtitle: 'Riepilogo spese all\'inizio del mese'),
+                      _buildSettingsTile(icon: CupertinoIcons.exclamationmark_triangle_fill, iconColor: CupertinoColors.destructiveRed, title: 'Soglia di budget', subtitle: 'Notifica se superi una soglia', isLast: true),
+                    ],
+                  ),
+
+                  _buildSectionHeader('DATI'),
+                  _buildSectionContainer(
+                    children: [
+                      _buildSettingsTile(icon: CupertinoIcons.arrow_down_doc_fill, iconColor: CupertinoColors.systemTeal, title: 'Importa / Esporta', subtitle: 'CSV o JSON · backup manuale'),
+                      _buildSettingsTile(icon: CupertinoIcons.cloud_fill, iconColor: CupertinoColors.activeBlue, title: 'Sync cloud', subtitle: 'Salvataggio automatico su database'),
+                      _buildSettingsTile(icon: CupertinoIcons.device_phone_portrait, iconColor: CupertinoColors.systemIndigo, title: 'Multi-dispositivo', subtitle: 'Gestione sessioni attive', isLast: true),
+                    ],
+                  ),
+
+                  _buildSectionHeader('ASPETTO'),
+                  _buildSectionContainer(
+                    children: [
+                      _buildSettingsTile(icon: CupertinoIcons.moon_fill, iconColor: CupertinoColors.systemGrey, title: 'Tema', subtitle: 'Chiaro · scuro · sistema'),
+                      _buildSettingsTile(icon: CupertinoIcons.square_grid_2x2_fill, iconColor: CupertinoColors.systemGrey2, title: 'Visualizzazione default', subtitle: 'Lista · griglia · raggruppata', isLast: true),
+                    ],
+                  ),
+
+                  _buildSectionHeader('PRIVACY'),
+                  _buildSectionContainer(
+                    children: [
+                      _buildSettingsTile(icon: CupertinoIcons.lock_fill, iconColor: CupertinoColors.systemGrey, title: 'Blocco app', subtitle: 'Face ID / Impronta / PIN'),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.eye_slash_fill, iconColor: CupertinoColors.systemGrey,
+                        title: 'Modalità privata', subtitle: 'Nasconde importi nelle schermate', isLast: true,
+                        trailing: CupertinoSwitch(value: false, onChanged: (bool value) {}, activeTrackColor: CupertinoColors.activeBlue),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: CupertinoButton(
+                      padding: EdgeInsets.zero, color: CupertinoColors.destructiveRed.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), onPressed: _signOut,
+                      child: const SizedBox(
+                        height: 56,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(CupertinoIcons.square_arrow_right, color: CupertinoColors.destructiveRed, size: 22),
+                            SizedBox(width: 10),
+                            Text('Disconnetti', style: TextStyle(color: CupertinoColors.destructiveRed, fontSize: 17, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

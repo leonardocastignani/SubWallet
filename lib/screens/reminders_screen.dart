@@ -1,63 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class RemindersScreen extends StatelessWidget {
+class RemindersScreen extends StatefulWidget {
   const RemindersScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<SettingsProvider>();
+  State<RemindersScreen> createState() => _RemindersScreenState();
+}
 
+class _RemindersScreenState extends State<RemindersScreen> {
+  int _reminderDays = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReminderDays();
+  }
+
+  Future<void> _loadReminderDays() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _reminderDays = prefs.getInt('reminderDays') ?? 3;
+    });
+  }
+
+  Future<void> _setReminderDays(int days) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('reminderDays', days);
+    setState(() {
+      _reminderDays = days;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        title: Text(provider.t('reminders_title')),
+        title: const Text('Promemoria Rinnovo'),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            
-            _buildSectionHeader(provider.t('alert_before')),
-            _buildSectionContainer(
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF9FC9FF), Color(0xFFF2F2F7)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.25],
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
               children: [
-                _buildCheckableTile(
-                  title: provider.t('day_1'), 
-                  isSelected: provider.reminderDays == 1, 
-                  onTap: () => provider.setReminderDays(1)
+                const SizedBox(height: 32),
+                
+                _buildSectionHeader('AVVISA PRIMA DELLA SCADENZA'),
+                _buildSectionContainer(
+                  children: [
+                    _buildCheckableTile(
+                      title: '1 giorno prima', 
+                      isSelected: _reminderDays == 1, 
+                      onTap: () => _setReminderDays(1)
+                    ),
+                    _buildCheckableTile(
+                      title: '3 giorni prima', 
+                      isSelected: _reminderDays == 3, 
+                      onTap: () => _setReminderDays(3)
+                    ),
+                    _buildCheckableTile(
+                      title: '7 giorni prima', 
+                      isSelected: _reminderDays == 7, 
+                      onTap: () => _setReminderDays(7)
+                    ),
+                    _buildCheckableTile(
+                      title: 'Nessuno', 
+                      isSelected: _reminderDays == 0, 
+                      isLast: true,
+                      onTap: () => _setReminderDays(0)
+                    ),
+                  ],
                 ),
-                _buildCheckableTile(
-                  title: provider.t('days_3'), 
-                  isSelected: provider.reminderDays == 3, 
-                  onTap: () => provider.setReminderDays(3)
-                ),
-                _buildCheckableTile(
-                  title: provider.t('days_7'), 
-                  isSelected: provider.reminderDays == 7, 
-                  onTap: () => provider.setReminderDays(7)
-                ),
-                _buildCheckableTile(
-                  title: provider.t('none'), 
-                  isSelected: provider.reminderDays == 0, 
-                  isLast: true,
-                  onTap: () => provider.setReminderDays(0)
+
+                const Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text(
+                    'Riceverai una notifica push locale per ricordarti dei pagamenti imminenti. Assicurati di aver concesso i permessi.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
+                  ),
                 ),
               ],
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Text(
-                provider.t('reminders_note'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey, height: 1.4),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

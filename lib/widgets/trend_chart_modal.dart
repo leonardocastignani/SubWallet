@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
 
 void showTrendChartModal(BuildContext context, List<QueryDocumentSnapshot> subscriptions) {
   showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => _TrendChartModalContent(subscriptions: subscriptions));
@@ -26,6 +24,11 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
   void initState() {
     super.initState();
     _calculateTrend();
+  }
+
+  String _getMonthShort(int month) {
+    const it = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+    return it[month - 1];
   }
 
   void _calculateTrend() {
@@ -62,7 +65,6 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
 
   @override
   Widget build(BuildContext context) {
-    final prov = context.watch<SettingsProvider>();
     const double chartInterval = 5.0;
 
     return Container(
@@ -71,7 +73,7 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
       child: Column(
         children: [
           Container(margin: const EdgeInsets.only(top: 12, bottom: 8), width: 40, height: 5, decoration: BoxDecoration(color: CupertinoColors.systemGrey4, borderRadius: BorderRadius.circular(10))),
-          Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(prov.t('trend_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Andamento nel tempo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5))),
           Expanded(
             child: ListView(
               physics: const BouncingScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -83,10 +85,10 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [const Icon(CupertinoIcons.graph_square_fill, color: CupertinoColors.activeBlue, size: 20), const SizedBox(width: 8), Text(prov.t('last_6_months'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey))]),
+                      const Row(children: [Icon(CupertinoIcons.graph_square_fill, color: CupertinoColors.activeBlue, size: 20), SizedBox(width: 8), Text('Ultimi 6 mesi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey))]),
                       const SizedBox(height: 12),
-                      Text('${prov.currency}${_currentSpend.toStringAsFixed(2)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
-                      Text(prov.t('current_monthly_spend'), style: const TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
+                      Text('€${_currentSpend.toStringAsFixed(2)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                      const Text('Spesa mensile attuale', style: TextStyle(fontSize: 13, color: CupertinoColors.systemGrey)),
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 200,
@@ -101,7 +103,7 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
                                   showTitles: true, reservedSize: 42, interval: chartInterval,
                                   getTitlesWidget: (value, meta) {
                                     if (value == 0 || value >= _maxSpend) return const SizedBox.shrink();
-                                    return Padding(padding: const EdgeInsets.only(right: 8.0), child: Text('${prov.currency}${value.toInt()}', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 11, fontWeight: FontWeight.w600), textAlign: TextAlign.right));
+                                    return Padding(padding: const EdgeInsets.only(right: 8.0), child: Text('€${value.toInt()}', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 11, fontWeight: FontWeight.w600), textAlign: TextAlign.right));
                                   },
                                 ),
                               ),
@@ -111,7 +113,7 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
                                   showTitles: true, reservedSize: 36, interval: 1,
                                   getTitlesWidget: (value, meta) {
                                     if (value.toInt() >= 0 && value.toInt() < _monthDates.length) {
-                                      return Padding(padding: const EdgeInsets.only(top: 12.0), child: Text(prov.tMonthShort(_monthDates[value.toInt()].month), style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 11, fontWeight: FontWeight.w600)));
+                                      return Padding(padding: const EdgeInsets.only(top: 12.0), child: Text(_getMonthShort(_monthDates[value.toInt()].month), style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 11, fontWeight: FontWeight.w600)));
                                     }
                                     return const SizedBox.shrink();
                                   },
@@ -120,7 +122,7 @@ class _TrendChartModalContentState extends State<_TrendChartModalContent> {
                             ),
                             lineTouchData: LineTouchData(
                               getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) => spotIndexes.map((index) => TouchedSpotIndicatorData(const FlLine(color: CupertinoColors.activeBlue, strokeWidth: 2, dashArray: [4, 4]), FlDotData(getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(radius: 5, color: Colors.white, strokeWidth: 3, strokeColor: CupertinoColors.activeBlue)))).toList(),
-                              touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => const Color(0xFF333333), getTooltipItems: (touchedSpots) => touchedSpots.map((spot) => LineTooltipItem('${prov.currency}${spot.y.toStringAsFixed(2)}', const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))).toList()),
+                              touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => const Color(0xFF333333), getTooltipItems: (touchedSpots) => touchedSpots.map((spot) => LineTooltipItem('€${spot.y.toStringAsFixed(2)}', const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))).toList()),
                             ),
                             lineBarsData: [
                               LineChartBarData(
