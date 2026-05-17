@@ -50,10 +50,17 @@ class StatisticsScreen extends StatelessWidget {
                 final double avgCost = totalSubs > 0 ? (totalMonthlySpend / totalSubs) : 0.0;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 4),
+                  padding: const EdgeInsets.only(top: 32, left: 16, right: 16, bottom: 4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 16, bottom: 8),
+                        child: Text(
+                          'STATISTICHE',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2),
+                        ),
+                      ),
                       IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,

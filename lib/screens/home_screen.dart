@@ -14,6 +14,7 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Container(
@@ -27,43 +28,58 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('subscriptions').where('userId', isEqualTo: user?.uid).snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CupertinoActivityIndicator(radius: 16));
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return _buildEmptyState();
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 32),
+                const Padding(
+                  padding: EdgeInsets.only(left: 32, bottom: 8),
+                  child: Text(
+                    'ABBONAMENTI',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.systemGrey, letterSpacing: 1.2),
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('subscriptions').where('userId', isEqualTo: user?.uid).snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CupertinoActivityIndicator(radius: 16));
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return _buildEmptyState();
 
-                final subscriptions = snapshot.data!.docs;
+                      final subscriptions = snapshot.data!.docs;
 
-                return ListView.builder(
-                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 88),
-                  itemCount: subscriptions.length,
-                  itemBuilder: (context, index) {
-                    final doc = subscriptions[index];
-                    final subData = doc.data() as Map<String, dynamic>;
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 88),
+                        itemCount: subscriptions.length,
+                        itemBuilder: (context, index) {
+                          final doc = subscriptions[index];
+                          final subData = doc.data() as Map<String, dynamic>;
 
-                    return Dismissible(
-                      key: Key(doc.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.only(right: 20),
-                        decoration: BoxDecoration(color: CupertinoColors.destructiveRed, borderRadius: BorderRadius.circular(20)),
-                        alignment: Alignment.centerRight, child: const Icon(CupertinoIcons.trash, color: Colors.white, size: 28),
-                      ),
-                      onDismissed: (direction) async {
-                        final String serviceName = subData['serviceName'] ?? 'Sconosciuto';
-                        await FirestoreService().deleteSubscription(doc.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$serviceName eliminato'), backgroundColor: Colors.black87, behavior: SnackBarBehavior.floating),
+                          return Dismissible(
+                            key: Key(doc.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.only(right: 20),
+                              decoration: BoxDecoration(color: CupertinoColors.destructiveRed, borderRadius: BorderRadius.circular(20)),
+                              alignment: Alignment.centerRight, child: const Icon(CupertinoIcons.trash, color: Colors.white, size: 28),
+                            ),
+                            onDismissed: (direction) async {
+                              final String serviceName = subData['serviceName'] ?? 'Sconosciuto';
+                              await FirestoreService().deleteSubscription(doc.id);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('$serviceName eliminato'), backgroundColor: Colors.black87, behavior: SnackBarBehavior.floating),
+                                );
+                              }
+                            },
+                            child: _buildSubscriptionCard(context, doc.id, subData),
                           );
-                        }
-                      },
-                      child: _buildSubscriptionCard(context, doc.id, subData),
-                    );
-                  },
-                );
-              },
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
