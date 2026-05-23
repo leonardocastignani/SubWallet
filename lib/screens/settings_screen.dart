@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'profile_screen.dart';
 import 'reminders_screen.dart';
 import 'monthly_report_screen.dart';
+import 'budget_threshold_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -75,6 +76,7 @@ class SettingsScreen extends StatelessWidget {
                         iconColor: CupertinoColors.destructiveRed, 
                         title: 'Soglia di budget', 
                         subtitle: 'Notifica se superi una soglia', 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BudgetThresholdScreen())),
                         isLast: true
                       ),
                     ],

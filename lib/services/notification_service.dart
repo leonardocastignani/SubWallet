@@ -199,4 +199,41 @@ class NotificationService {
 
     debugPrint("Notifica programmata in sottofondo per $serviceName il $tzScheduledDate");
   }
+
+  Future<void> showBudgetAlert(double currentSpend, double threshold) async {
+    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'subwallet_budget_channel',
+      'Avvisi Budget',
+      channelDescription: 'Avvisi quando superi la soglia di spesa mensile',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      color: Color(0xFFFF3B30),
+      enableLights: true,
+      ledColor: Color(0xFFFF3B30),
+      ledOnMs: 1000,
+      ledOffMs: 500,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList([0, 500, 200, 500]),
+      styleInformation: BigTextStyleInformation(
+        'Attenzione! La tua spesa mensile stimata è arrivata a <b>€${currentSpend.toStringAsFixed(2)}</b>, superando il limite di sicurezza di <b>€${threshold.toStringAsFixed(2)}</b>.',
+        htmlFormatBigText: true,
+        contentTitle: '<b>⚠️ Soglia Budget Superata!</b>',
+        htmlFormatContentTitle: true,
+        summaryText: 'Allarme Spesa',
+      ),
+    );
+
+    final NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(presentSound: true, presentBadge: true, presentAlert: true),
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      id: 777777,
+      title: '⚠️ Soglia Budget Superata!',
+      body: 'Hai superato il limite mensile impostato di €${threshold.toStringAsFixed(2)}.',
+      notificationDetails: platformDetails,
+    );
+  }
 }

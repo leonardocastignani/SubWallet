@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
+import '../services/budget_service.dart';
 
 class AddSubscriptionScreen extends StatefulWidget {
   final String serviceName;
@@ -37,7 +38,9 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose(); _priceController.dispose(); _notesController.dispose();
+    _nameController.dispose(); 
+    _priceController.dispose(); 
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -82,7 +85,14 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$finalServiceName aggiunto!'), backgroundColor: CupertinoColors.activeGreen, behavior: SnackBarBehavior.floating));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('$finalServiceName aggiunto!'), 
+        backgroundColor: CupertinoColors.activeGreen, 
+        behavior: SnackBarBehavior.floating
+      ));
+      
+      await BudgetService.checkBudgetAfterAddition();
+      if (!mounted) return;
       Navigator.pop(context);
     }
   }
