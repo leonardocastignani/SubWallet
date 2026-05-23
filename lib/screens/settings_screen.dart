@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'profile_screen.dart';
 import 'reminders_screen.dart';
+import 'monthly_report_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -56,40 +57,89 @@ class SettingsScreen extends StatelessWidget {
                   _buildSectionContainer(
                     children: [
                       _buildSettingsTile(
-                        icon: CupertinoIcons.bell_fill, iconColor: CupertinoColors.systemOrange, 
-                        title: 'Promemoria rinnovo', subtitle: 'Avvisa 1/3/7 giorni prima',
+                        icon: CupertinoIcons.bell_fill, 
+                        iconColor: CupertinoColors.systemOrange, 
+                        title: 'Promemoria rinnovo', 
+                        subtitle: 'Avvisa 1/3/7 giorni prima',
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RemindersScreen())),
                       ),
-                      _buildSettingsTile(icon: CupertinoIcons.doc_text_fill, iconColor: CupertinoColors.systemYellow, title: 'Report mensile', subtitle: 'Riepilogo spese all\'inizio del mese'),
-                      _buildSettingsTile(icon: CupertinoIcons.exclamationmark_triangle_fill, iconColor: CupertinoColors.destructiveRed, title: 'Soglia di budget', subtitle: 'Notifica se superi una soglia', isLast: true),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.doc_text_fill, 
+                        iconColor: CupertinoColors.systemYellow, 
+                        title: 'Report mensile', 
+                        subtitle: 'Riepilogo spese all\'inizio del mese',
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MonthlyReportScreen())),
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.exclamationmark_triangle_fill, 
+                        iconColor: CupertinoColors.destructiveRed, 
+                        title: 'Soglia di budget', 
+                        subtitle: 'Notifica se superi una soglia', 
+                        isLast: true
+                      ),
                     ],
                   ),
 
                   _buildSectionHeader('DATI'),
                   _buildSectionContainer(
                     children: [
-                      _buildSettingsTile(icon: CupertinoIcons.arrow_down_doc_fill, iconColor: CupertinoColors.systemTeal, title: 'Importa / Esporta', subtitle: 'CSV o JSON · backup manuale'),
-                      _buildSettingsTile(icon: CupertinoIcons.cloud_fill, iconColor: CupertinoColors.activeBlue, title: 'Sync cloud', subtitle: 'Salvataggio automatico su database'),
-                      _buildSettingsTile(icon: CupertinoIcons.device_phone_portrait, iconColor: CupertinoColors.systemIndigo, title: 'Multi-dispositivo', subtitle: 'Gestione sessioni attive', isLast: true),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.arrow_down_doc_fill, 
+                        iconColor: CupertinoColors.systemTeal, 
+                        title: 'Importa / Esporta', 
+                        subtitle: 'CSV o JSON · backup manuale'
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.cloud_fill, 
+                        iconColor: CupertinoColors.activeBlue, 
+                        title: 'Sync cloud', 
+                        subtitle: 'Salvataggio automatico su database'
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.device_phone_portrait, 
+                        iconColor: CupertinoColors.systemIndigo, 
+                        title: 'Multi-dispositivo', 
+                        subtitle: 'Gestione sessioni attive', 
+                        isLast: true
+                      ),
                     ],
                   ),
 
                   _buildSectionHeader('ASPETTO'),
                   _buildSectionContainer(
                     children: [
-                      _buildSettingsTile(icon: CupertinoIcons.moon_fill, iconColor: CupertinoColors.systemGrey, title: 'Tema', subtitle: 'Chiaro · scuro · sistema'),
-                      _buildSettingsTile(icon: CupertinoIcons.square_grid_2x2_fill, iconColor: CupertinoColors.systemGrey2, title: 'Visualizzazione default', subtitle: 'Lista · griglia · raggruppata', isLast: true),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.moon_fill, 
+                        iconColor: CupertinoColors.systemGrey, 
+                        title: 'Tema', 
+                        subtitle: 'Chiaro · scuro · sistema'
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.square_grid_2x2_fill, 
+                        iconColor: CupertinoColors.systemGrey2, 
+                        title: 'Visualizzazione default', 
+                        subtitle: 'Lista · griglia · raggruppata', 
+                        isLast: true
+                      ),
                     ],
                   ),
 
                   _buildSectionHeader('PRIVACY'),
                   _buildSectionContainer(
                     children: [
-                      _buildSettingsTile(icon: CupertinoIcons.lock_fill, iconColor: CupertinoColors.systemGrey, title: 'Blocco app', subtitle: 'Face ID / Impronta / PIN'),
                       _buildSettingsTile(
-                        icon: CupertinoIcons.eye_slash_fill, iconColor: CupertinoColors.systemGrey,
-                        title: 'Modalità privata', subtitle: 'Nasconde importi nelle schermate', isLast: true,
-                        trailing: CupertinoSwitch(value: false, onChanged: (bool value) {}, activeTrackColor: CupertinoColors.activeBlue),
+                        icon: CupertinoIcons.lock_fill, 
+                        iconColor: CupertinoColors.systemGrey, 
+                        title: 'Blocco app', 
+                        subtitle: 'Face ID / Impronta / PIN'
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.eye_slash_fill, 
+                        iconColor: CupertinoColors.systemGrey,
+                        title: 'Modalità privata', 
+                        subtitle: 'Nasconde importi nelle schermate', isLast: true,
+                        trailing: CupertinoSwitch(value: false, onChanged: (bool value) {}, 
+                        activeTrackColor: CupertinoColors.activeBlue),
                       ),
                     ],
                   ),

@@ -12,6 +12,8 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+  static const int _monthlyReportId = 888888; 
+
   Future<void> init() async {
     tz.initializeTimeZones();
     
@@ -50,6 +52,60 @@ class NotificationService {
     } catch (e) {
       debugPrint("Permessi già richiesti o in corso.");
     }
+  }
+
+  Future<void> scheduleMonthlyReport({required bool enable}) async {
+    if (!enable) {
+      await flutterLocalNotificationsPlugin.cancel(id: _monthlyReportId);
+      debugPrint("Report mensile disattivato. Allarme cancellato.");
+      return;
+    }
+
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, 1, 10, 0);
+    
+    if (scheduledDate.isBefore(now)) {
+      int nextMonth = now.month + 1;
+      int year = now.year;
+      if (nextMonth > 12) {
+        nextMonth = 1;
+        year++;
+      }
+      scheduledDate = tz.TZDateTime(tz.local, year, nextMonth, 1, 10, 0);
+    }
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'subwallet_report_channel',
+      'Report Mensile',
+      channelDescription: 'Riepilogo delle spese all\'inizio del mese',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher', 
+      color: Color(0xFF007AFF),
+      enableLights: true,
+      ledColor: Color(0xFF007AFF),
+      ledOnMs: 1000,
+      ledOffMs: 500,
+      enableVibration: true,
+    );
+
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(presentSound: true, presentBadge: true, presentAlert: true),
+    );
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id: _monthlyReportId,
+      title: '📊 Il tuo Report è pronto!',
+      body: 'È iniziato un nuovo mese. Apri SubWallet per controllare le tue spese imminenti.',
+      scheduledDate: scheduledDate,
+      notificationDetails: platformDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+    );
+
+    debugPrint("Report mensile ATTIVATO: prima esecuzione -> $scheduledDate");
   }
 
   Future<void> scheduleRenewalReminder({
